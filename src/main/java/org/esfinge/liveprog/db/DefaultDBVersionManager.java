@@ -295,7 +295,7 @@ public class DefaultDBVersionManager extends JFrame implements ILiveClassDBVersi
 			switch ( column )
 			{
 				case 0: return "Nome";
-				case 1: return "Versão de Produçãoo";
+				case 1: return "Versão de Produção";
 				case 2: return "Versão de Testes";
 				default: return "";
 			}
