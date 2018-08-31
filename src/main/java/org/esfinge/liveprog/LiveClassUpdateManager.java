@@ -1,6 +1,5 @@
 package org.esfinge.liveprog;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -39,13 +38,10 @@ class LiveClassUpdateManager implements ILiveClassFileMonitorObserver
 	}
 	
 	@Override
-	public synchronized void classFileUpdated(File classFile)
+	public synchronized void classFileUpdated(ClassInfo classInfo)
 	{
 		try
 		{
-			// obtem as informacoes da classe do arquivo recebido
-			ClassInfo classInfo = InstrumentationService.inspect(classFile);
-			
 			// TODO: debug..
 			System.out.println("FILE MANAGER >> Classe recebida: " + classInfo.getName());
 			

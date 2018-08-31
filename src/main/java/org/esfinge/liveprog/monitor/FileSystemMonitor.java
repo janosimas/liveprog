@@ -16,6 +16,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.esfinge.liveprog.instrumentation.ClassInfo;
+import org.esfinge.liveprog.instrumentation.InstrumentationService;
+
 /**
  * Monitora novas versoes de classes dinamicas no sistema de arquivos.
  * 
@@ -166,8 +169,11 @@ public class FileSystemMonitor extends AbstractLiveClassFileMonitor
 				    		// TODO: debug
 				    		System.out.println("MONITOR >> Novo arquivo encontrado: " + arquivo.getName() );
 
+								// obtem as informacoes da classe do arquivo recebido
+								ClassInfo classInfo = InstrumentationService.inspect(arquivo);
+
 				    		// notifica os observadores
-				    		FileSystemMonitor.this.notifyObservers(arquivo);
+				    		FileSystemMonitor.this.notifyObservers(classInfo);
 				    	}
 				    }
 				    
