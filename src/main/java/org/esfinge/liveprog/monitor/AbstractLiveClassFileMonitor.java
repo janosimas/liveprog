@@ -1,8 +1,9 @@
 package org.esfinge.liveprog.monitor;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.esfinge.liveprog.instrumentation.ClassInfo;
 
 /**
  * Estrutura base para monitores de arquivos de classes dinamicas.
@@ -53,12 +54,13 @@ public abstract class AbstractLiveClassFileMonitor implements ILiveClassFileMoni
 	}
 	
 	/**
-	 * Notifica os observadores que um arquivo de uma nova versao de classe dinamica foi encontrado.
+	 * Notifica os observadores que um arquivo de uma nova versao de classe dinamica
+	 * foi encontrado.
 	 * 
-	 * @param classFile o arquivo da nova versao da classe dinamica
+	 * @param classInfo Informações sobre a nova versao da classe dinamica
 	 */
-	protected void notifyObservers(File classFile)
+	protected void notifyObservers(ClassInfo classInfo)
 	{
-		this.observers.forEach(obs -> obs.classFileUpdated(classFile));
+		this.observers.forEach(obs -> obs.classFileUpdated(classInfo));
 	}
 }

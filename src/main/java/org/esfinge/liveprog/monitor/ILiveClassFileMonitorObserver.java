@@ -1,6 +1,6 @@
 package org.esfinge.liveprog.monitor;
 
-import java.io.File;
+import org.esfinge.liveprog.instrumentation.ClassInfo;
 
 /**
  * Interface para ser notificado quando arquivos de novas versoes de classes dinamicas forem encontrados.
@@ -10,7 +10,7 @@ public interface ILiveClassFileMonitorObserver
 	/**
 	 * Notifica que um arquivo de uma nova versao de classe dinamica foi encontrado.
 	 * 
-	 * @param classFile o arquivo da nova versao da classe dinamica, para que possa ser recarregada
+	 * @param classInfo Informações da nova versao da classe dinamica
 	 */
-	public void classFileUpdated(File classFile);
+	public void classFileUpdated(ClassInfo classInfo);
 }
