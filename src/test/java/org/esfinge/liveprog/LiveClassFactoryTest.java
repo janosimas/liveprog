@@ -51,7 +51,7 @@ public class LiveClassFactoryTest {
 			Assert.assertEquals("New live object not of ClassA, should not be updated.", (new ClassA()).getName(),
 					a3Class.getName());
 
-			verify(dbMock, never()).saveLiveClass(any(), any());
+			verify(dbMock, times(1)).saveLiveClass(any(), any());
 			reset(dbMock);
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
