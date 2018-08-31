@@ -1,58 +1,103 @@
 package org.esfinge.liveprog;
 
-import org.esfinge.liveprog.monitor.FileSystemMonitor;
-import org.mockito.Mockito;
+import org.esfinge.liveprog.db.ILiveClassDB;
+import org.esfinge.liveprog.instrumentation.ClassInfo;
+import org.esfinge.liveprog.instrumentation.inspector.InspectorHelper;
+import org.junit.Assert;
+import org.junit.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 
-public class LiveClassFactoryTest {    
-	FileSystemMonitor monitorMock = Mockito.mock(FileSystemMonitor.class);
-	LiveClassLoader loaderMock = Mockito.mock(LiveClassLoader.class);
-	
-	/*
+public class LiveClassFactoryTest {    	
+
+	/**
+	 * Creates a live object and verifies if updated
+	 */
 	@Test
-	public void testLiveClassFactory() {    
+	public void testCreateObjectInTestMode() {    
 		try {
-			LiveClassFactory factory = new LiveClassFactory(monitorMock);
-			Mockito.verify(monitorMock).setObserver(factory);
+			ILiveClassDB dbMock = mock(ILiveClassDB.class);
+			
+			LiveClassFactory factory = new LiveClassFactory(dbMock);
+
+			ClassA aClass = factory.createLiveObjectInTestMode(ClassA.class);
+
+			verify(dbMock, times(1)).getLiveClass(eq(ClassA.class.getName()), eq(true));
+			verify(dbMock, times(1)).saveLiveClass(eq(ClassA.class.getName()), any());
+			reset(dbMock);
+
+			Assert.assertEquals("Live object not of ClassA.", (new ClassA()).getName(), aClass.getName());
+
+			ClassInfo bInfo = (new InspectorHelper()).inspect(ClassB.class);
+			factory.liveClassUpdated(ClassA.class.getName(), bInfo);
+
+			Assert.assertEquals("Live object not of ClassB.", (new ClassB()).getName(), aClass.getName());
+
+			verify(dbMock, times(1)).saveLiveClass(eq(ClassA.class.getName()), eq(bInfo));
+			reset(dbMock);
+
+			ClassA a2Class = factory.createLiveObjectInTestMode(ClassA.class);
+			Assert.assertEquals("New live object not of ClassB.", (new ClassB()).getName(), a2Class.getName());
+
+			verify(dbMock, never()).saveLiveClass(any(), any());
+			reset(dbMock);
+
+			ClassA a3Class = factory.createLiveObject(ClassA.class);
+			Assert.assertEquals("New live object not of ClassA, should not be updated.", (new ClassA()).getName(),
+					a3Class.getName());
+
+			verify(dbMock, times(1)).saveLiveClass(any(), any());
+			reset(dbMock);
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 	}
 
+	/**
+	 * Creates a live object not in test mode and verifies if updated
+	 */
 	@Test
-	public void testCreateObject() {
+	public void testCreateObjectInProductionMode() {
 		try {
-			Mockito
-				.when(loaderMock.loadUpdatedClass(Mockito.any()))
-				.then(new Answer<Class<?>>() {
-				    @Override
-				    public Class<?> answer(InvocationOnMock invocation) throws Throwable {
-				      return ClassB.class;
-				    }
-				});
-			
-			ClassInstrumentation instrumentationMock = Mockito.mock(ClassInstrumentation.class);
-			Mockito
-			.when(instrumentationMock.getClassName())
-			.then(new Answer<String>() {
-			    @Override
-			    public String answer(InvocationOnMock invocation) throws Throwable {
-			      return ClassA.class.getName();
-			    }
-			});
-			
-			LiveClassFactory factory = new LiveClassFactory(monitorMock,loaderMock);
-			ClassA a = factory.createObject(ClassA.class);
-			
-			factory.classFileUpdated(instrumentationMock);
-			
-			Mockito
-				.verify(loaderMock)
-				.loadUpdatedClass(Mockito.any());
-			
-			Assert.assertEquals("ClassB", a.getName());
+			ILiveClassDB dbMock = mock(ILiveClassDB.class);
+
+			LiveClassFactory factory = new LiveClassFactory(dbMock);
+
+			ClassA aClass = factory.createLiveObject(ClassA.class);
+
+			verify(dbMock, times(1)).getLiveClass(eq(ClassA.class.getName()), eq(false));
+			verify(dbMock, times(1)).saveLiveClass(eq(ClassA.class.getName()), any());
+			reset(dbMock);
+
+			Assert.assertEquals("Live object not of ClassA.", (new ClassA()).getName(), aClass.getName());
+
+			ClassInfo bInfo = (new InspectorHelper()).inspect(ClassB.class);
+			factory.liveClassUpdated(ClassA.class.getName(), bInfo);
+
+			Assert.assertEquals("Live object not of ClassA, should not be updated.", (new ClassA()).getName(), aClass.getName());
+
+			verify(dbMock, times(1)).saveLiveClass(eq(ClassA.class.getName()), eq(bInfo));
+			reset(dbMock);
+
+			ClassA a2Class = factory.createLiveObject(ClassA.class);
+			Assert.assertEquals("New live object not of ClassA, should not be updated.", (new ClassA()).getName(), a2Class.getName());
+
+			verify(dbMock, never()).saveLiveClass(any(), any());
+			reset(dbMock);
+
+			ClassA a3Class = factory.createLiveObjectInTestMode(ClassA.class);
+			Assert.assertEquals("New live object not of ClassB, should be updated.", (new ClassB()).getName(),
+					a3Class.getName());
+
+			verify(dbMock, never()).saveLiveClass(any(), any());
+			reset(dbMock);
 		} catch (Exception e) {
 			Assert.fail(e.getMessage());
 		}
 	}
-	*/
 }

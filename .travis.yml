@@ -2,6 +2,5 @@ language: java
 jdk:
   - oraclejdk8
 script:
-- cd LiveProg
-- mvn install
-- mvn test
+- mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- mvn test -B -V
